@@ -124,9 +124,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     /// Waiting or finished: the click takes the person to that session (the latest one, if several); finished
-    /// sessions then go back to rest.
+    /// sessions then go back to rest. Working or resting: the figure does a trick.
     private func petClicked() {
-        guard summary.state == .done || summary.state == .blocked else { return }
+        guard summary.state == .done || summary.state == .blocked else { return petView.playRandomTrick() }
         if let session = summary.sessions.first { Jump.plan(for: session).perform() }
         if summary.state == .done {
             store.acknowledgeDone()
@@ -208,6 +208,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         menu.addItem(submenu("Rozmiar", sizeMenu))
 
+        let trickMenu = NSMenu()
+        for (index, trick) in petView.tricks.enumerated() {
+            let item = NSMenuItem(title: trick.title, action: #selector(playTrick(_:)), keyEquivalent: "")
+            item.target = self
+            item.tag = index
+            trickMenu.addItem(item)
+        }
+        menu.addItem(submenu("Sztuczki", trickMenu))
+
         menu.addItem(toggle("Dźwięk, gdy czeka lub skończy", on: defaults.bool(forKey: Key.sound), action: #selector(toggleSound)))
         menu.addItem(toggle("Uruchamiaj przy logowaniu", on: SMAppService.mainApp.status == .enabled, action: #selector(toggleLoginItem)))
         menu.addItem(.separator())
@@ -238,6 +247,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc private func jumpToSession(_ sender: NSMenuItem) {
         guard let session = (sender.representedObject as? SessionBox)?.record else { return }
         Jump.plan(for: session).perform()
+    }
+
+    @objc private func playTrick(_ sender: NSMenuItem) {
+        let tricks = petView.tricks
+        guard tricks.indices.contains(sender.tag) else { return }
+        if !window.isVisible { toggleVisible() }
+        petView.play(tricks[sender.tag])
     }
 
     @objc private func pickHero(_ sender: NSMenuItem) {

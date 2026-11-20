@@ -12,6 +12,8 @@ struct PetLook: Equatable {
 final class PetView: NSView {
     static let bubbleHeight: CGFloat = 34
     static let hopHeight: CGFloat = 10
+    /// Empty space above the bubble for fireworks, a thrown dwarf and the like; it lets clicks through.
+    static let trickRoom: CGFloat = 50
     static let width: CGFloat = 240
 
     var look: PetLook { didSet { if look != oldValue { lookChanged(from: oldValue) } } }
@@ -25,6 +27,11 @@ final class PetView: NSView {
     private var dragStart: NSPoint?
     private var windowStart: NSPoint?
     private var dragged = false
+    private var trick: Trick?
+    private var trickStart: Date?
+    private var trickTimer: Timer?
+    private var frozenTrickTime: TimeInterval?
+    private(set) var lastTrickID: String?
 
     override var isFlipped: Bool { true }
 
@@ -37,7 +44,7 @@ final class PetView: NSView {
     required init?(coder: NSCoder) { fatalError() }
 
     static func size(scale: CGFloat) -> NSSize {
-        NSSize(width: width, height: bubbleHeight + hopHeight + CGFloat(Sprite.gridSize) * scale)
+        NSSize(width: width, height: trickRoom + bubbleHeight + hopHeight + CGFloat(Sprite.gridSize) * scale)
     }
 
     private var spriteSide: CGFloat { CGFloat(Sprite.gridSize) * look.scale }
@@ -85,22 +92,117 @@ final class PetView: NSView {
         return -abs(sin(t * .pi * 2 / 0.45)) * Self.hopHeight
     }
 
+    /// The tricks of the figure as it is drawn now.
+    var tricks: [Trick] {
+        Tricks.all(for: look.hero, edition: look.edition, stage: stage)
+    }
+
+    func playRandomTrick() {
+        play(Tricks.pick(for: look.hero, edition: look.edition, stage: stage, after: lastTrickID))
+    }
+
+    func play(_ trick: Trick) {
+        self.trick = trick
+        lastTrickID = trick.id
+        trickStart = Date()
+        trickTimer?.invalidate()
+        trickTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60, repeats: true) { [weak self] timer in
+            guard let self, let start = self.trickStart, let trick = self.trick else { return timer.invalidate() }
+            if Date().timeIntervalSince(start) >= trick.duration {
+                self.trick = nil
+                self.trickStart = nil
+                timer.invalidate()
+            }
+            self.needsDisplay = true
+        }
+    }
+
+    private var stage: Stage {
+        let rest = Pose.of(hero: look.hero, edition: look.edition, state: .idle).frames[0]
+        return Stage(sprite: SpriteLibrary.shared.sprite(named: rest))
+    }
+
+    private var currentTrickFrame: TrickFrame? {
+        guard let trick else { return nil }
+        let t = frozenTrickTime ?? trickStart.map { Date().timeIntervalSince($0) } ?? 0
+        return t < trick.duration ? trick.frame(t) : nil
+    }
+
+    private func spriteName(for pose: TrickPose, at t: TimeInterval) -> String {
+        let state: PetState
+        switch pose {
+        case .current:
+            let frames = Pose.of(hero: look.hero, edition: look.edition, state: look.state).frames
+            return frames[frameIndex % frames.count]
+        case .idle: state = .idle
+        case .work: state = .working
+        case .blocked: state = .blocked
+        case .done: state = .done
+        }
+        let frames = Pose.of(hero: look.hero, edition: look.edition, state: state).frames
+        let beat = state == .working ? 0.15 : 0.45
+        return frames[Int(t / beat) % frames.count]
+    }
+
     private func updateToolTip() {
         toolTip = look.edition == .rare ? look.hero.rareName : look.edition == .sax ? "Epic Sax Gandalf" : look.hero.displayName
     }
 
     override func draw(_ dirtyRect: NSRect) {
-        NSGraphicsContext.current?.imageInterpolation = .none
-        NSGraphicsContext.current?.shouldAntialias = false
-        let pose = Pose.of(hero: look.hero, edition: look.edition, state: look.state)
-        let name = pose.frames[frameIndex % pose.frames.count]
-        let rect = spriteRect.offsetBy(dx: 0, dy: hopOffset)
-        SpriteLibrary.shared.sprite(named: name)?.draw(at: rect.origin, scale: look.scale)
-        NSGraphicsContext.current?.shouldAntialias = true
-        if let bubble = look.bubble { drawBubble(bubble, above: rect) }
+        guard let context = NSGraphicsContext.current else { return }
+        context.imageInterpolation = .none
+        context.shouldAntialias = false
+        let rest = spriteRect.offsetBy(dx: 0, dy: hopOffset)
+        let t = frozenTrickTime ?? trickStart.map { Date().timeIntervalSince($0) } ?? 0
+        let frame = currentTrickFrame ?? TrickFrame()
+        let cg = context.cgContext
+
+        drawSpecks(frame.behind, origin: rest.origin, in: cg)
+
+        cg.saveGState()
+        let s = look.scale
+        cg.translateBy(x: rest.minX + CGFloat(frame.dx) * s, y: rest.minY + CGFloat(frame.dy) * s)
+        let centre = CGFloat(Sprite.gridSize) * s / 2
+        let feet = CGFloat(Sprite.gridSize) * s
+        if frame.rotation != 0 {
+            cg.translateBy(x: centre, y: centre)
+            cg.rotate(by: CGFloat(frame.rotation) * .pi / 180)
+            cg.translateBy(x: -centre, y: -centre)
+        }
+        if frame.stretch != 1 || frame.flipped {
+            cg.translateBy(x: centre, y: feet)
+            cg.scaleBy(x: (frame.flipped ? -1 : 1) / CGFloat(frame.stretch).squareRoot(), y: CGFloat(frame.stretch))
+            cg.translateBy(x: -centre, y: -feet)
+        }
+        cg.setAlpha(CGFloat(frame.alpha))
+        cg.beginTransparencyLayer(auxiliaryInfo: nil)
+        SpriteLibrary.shared.sprite(named: spriteName(for: frame.pose, at: t))?.draw(at: .zero, scale: s)
+        cg.endTransparencyLayer()
+        cg.restoreGState()
+
+        drawSpecks(frame.front, origin: rest.origin, in: cg)
+
+        context.shouldAntialias = true
+        if let bubble = frame.bubble {
+            drawBubble(bubble, above: spriteRect, ink: NSColor(srgbRed: 0.72, green: 0.53, blue: 0.04, alpha: 1))
+        } else if let bubble = look.bubble {
+            drawBubble(bubble, above: spriteRect, ink: look.state == .blocked
+                ? NSColor(srgbRed: 0.70, green: 0.22, blue: 0.16, alpha: 1)
+                : NSColor(srgbRed: 0.33, green: 0.50, blue: 0.24, alpha: 1))
+        }
     }
 
-    private func drawBubble(_ text: String, above sprite: NSRect) {
+    private func drawSpecks(_ specks: [Speck], origin: CGPoint, in cg: CGContext) {
+        let s = look.scale
+        for speck in specks where speck.alpha > 0.01 {
+            cg.setFillColor(red: CGFloat((speck.color >> 16) & 0xff) / 255, green: CGFloat((speck.color >> 8) & 0xff) / 255,
+                            blue: CGFloat(speck.color & 0xff) / 255, alpha: CGFloat(min(1, speck.alpha)))
+            cg.fill(CGRect(x: origin.x + CGFloat(speck.x.rounded(.down)) * s, y: origin.y + CGFloat(speck.y.rounded(.down)) * s,
+                           width: CGFloat(speck.w) * s, height: CGFloat(speck.h) * s))
+        }
+    }
+
+    private func drawBubble(_ text: String, above sprite: NSRect, ink: NSColor) {
         let attributes: [NSAttributedString.Key: Any] = [
             .font: NSFont.systemFont(ofSize: 12, weight: .semibold),
             .foregroundColor: NSColor(srgbRed: 0.17, green: 0.12, blue: 0.09, alpha: 1),
@@ -123,9 +225,6 @@ final class PetView: NSView {
         tail.line(to: NSPoint(x: bounds.midX + 5, y: box.maxY - 0.5))
         tail.close()
         let parchment = NSColor(srgbRed: 0.97, green: 0.93, blue: 0.82, alpha: 0.97)
-        let ink = look.state == .blocked
-            ? NSColor(srgbRed: 0.70, green: 0.22, blue: 0.16, alpha: 1)
-            : NSColor(srgbRed: 0.33, green: 0.50, blue: 0.24, alpha: 1)
         parchment.setFill()
         path.fill()
         tail.fill()
@@ -164,9 +263,11 @@ final class PetView: NSView {
     }
 
     /// The pet drawn off screen, for the README preview and for checking the art without a display.
-    static func snapshot(of look: PetLook) -> NSImage {
+    static func snapshot(of look: PetLook, trick: Trick? = nil, at time: TimeInterval = 0) -> NSImage {
         let view = PetView(look: look)
         view.frameTimer?.invalidate()
+        view.trick = trick
+        view.frozenTrickTime = time
         return NSImage(size: view.bounds.size, flipped: true) { _ in
             view.draw(view.bounds)
             return true

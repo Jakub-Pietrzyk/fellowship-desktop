@@ -11,6 +11,20 @@ Gandalf (albo ktoś inny z Drużyny) stoi na pulpicie Maca i pokazuje, co robi C
 | skończył | podskakuje, zielony dymek „gotowe!”; kliknij postać, żeby odpoczęła |
 | nic się nie dzieje | pyka fajkę |
 
+Kliknięcie postaci, gdy Claude pracuje albo odpoczywa, odpala sztuczkę (za każdym razem inną):
+
+| Postać | Sztuczki |
+|---|---|
+| Gandalf | fajerwerki, „Nie przejdziesz!”, kółka z dymu (Epic Sax Gandalf gra solo), „Czarodziej nigdy się nie spóźnia” |
+| Frodo | zakłada Pierścień i znika pod okiem Saurona, taniec Underhilla, świecące Żądło, liście Lórien |
+| Sam | żongluje ziemniakami, sadzi kwiatki, patelnia, „Ciebie mogę nieść!” |
+| Aragorn | „Za Frodo!”, Andúril, korona, athelas |
+| Legolas | strzały, zjazd na tarczy, elfi wzrok, salto |
+| Gimli | rzut krasnoludem, topór, kufel, tupanie |
+| Sauron | płonące Oko, Jedyny Pierścień, ciemność, gniew z piorunami |
+
+Konkretną sztuczkę wybierzesz z menu **Sztuczki** na pasku.
+
 Przy kilku sesjach naraz postać pokazuje najpilniejszą: czeka > pracuje > skończył > odpoczywa.
 
 Kliknięcie postaci, gdy Claude czeka lub skończył, przenosi do tej sesji (do najnowszej, jeśli jest ich kilka).
@@ -21,6 +35,7 @@ Menu na pasku pokazuje wszystkie sesje, a kliknięcie pozycji przenosi do jej ok
 | VS Code, Cursor, Windsurf | okno z folderem projektu |
 | Terminal, iTerm | karta z sesją; za pierwszym razem macOS pyta o zgodę na sterowanie terminalem (bez niej tylko przełącza na aplikację) |
 | aplikacja Claude i inne | przełącza na aplikację (bez wybierania konkretnej rozmowy) |
+
 Działa z Claude Code w terminalu, w Herdrze, w VS Code i w aplikacji desktopowej Claude, bo wszystkie czytają te
 same hooki z `~/.claude/settings.json`.
 
@@ -57,6 +72,7 @@ Ikonka postaci na pasku menu:
 - **Postać**: Gandalf, Frodo, Sam, Aragorn, Legolas, Gimli, Sauron
 - **Edycja**: losowa przy starcie (10% rzadka, 1% Epic Sax Gandalf), zwykła, rzadka, Epic Sax Gandalf
 - **Rozmiar**: mała, średnia, duża
+- **Sztuczki**: odpala wybraną sztuczkę postaci
 - dźwięk, gdy Claude czeka lub skończy; uruchamianie przy logowaniu
 - ukryj / pokaż, przywróć w prawy dolny róg
 
@@ -68,6 +84,7 @@ Postać przeciągasz myszką. Klika się tylko w samą postać, reszta okna prze
 swift test                                   # testy
 swift run FellowshipDesktop                  # uruchomienie z repo (sprite'y z Sprites/)
 swift run FellowshipDesktop preview out.png  # arkusz z postaciami, jak docs/preview.png
+swift run FellowshipDesktop tricks out/      # arkusz ze sztuczkami każdej postaci (5 klatek na sztuczkę)
 scripts/build-app.sh                         # build/FellowshipDesktop.app
 ```
 

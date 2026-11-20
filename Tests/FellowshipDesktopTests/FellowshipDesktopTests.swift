@@ -233,3 +233,91 @@ final class SessionHostTests: XCTestCase {
         XCTAssertEqual(summary.all.map(\.project), ["d", "c", "b", "a"])
     }
 }
+
+final class TrickTests: XCTestCase {
+    private let library = SpriteLibrary(directory: URL(fileURLWithPath: #filePath)
+        .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+        .appendingPathComponent("Sprites"))
+
+    private func everyTrick() -> [(Hero, Edition, Trick)] {
+        Hero.allCases.flatMap { hero in
+            Edition.allCases.filter { $0.isAvailable(for: hero) }.flatMap { edition in
+                Tricks.all(for: hero, edition: edition).map { (hero, edition, $0) }
+            }
+        }
+    }
+
+    func testEveryHeroHasThreeToFiveDistinctTricks() {
+        for hero in Hero.allCases {
+            for edition in Edition.allCases where edition.isAvailable(for: hero) {
+                let tricks = Tricks.all(for: hero, edition: edition)
+                XCTAssertTrue((3...5).contains(tricks.count), "\(hero) \(edition)")
+                XCTAssertEqual(Set(tricks.map(\.id)).count, tricks.count, "duplicate trick id for \(hero)")
+            }
+        }
+    }
+
+    func testSaxGandalfPlaysTheSaxInsteadOfSmokingThePipe() {
+        let ids = Tricks.all(for: .gandalf, edition: .sax).map(\.id)
+        XCTAssertTrue(ids.contains("sax-solo"))
+        XCTAssertFalse(ids.contains("smoke-rings"))
+    }
+
+    func testTricksEndWithTheFigureBackAtRest() {
+        for (hero, _, trick) in everyTrick() {
+            let end = trick.frame(trick.duration)
+            XCTAssertEqual(end.dx, 0, accuracy: 0.01, "\(hero) \(trick.id)")
+            XCTAssertEqual(end.dy, 0, accuracy: 0.01, "\(hero) \(trick.id)")
+            XCTAssertEqual(end.rotation.truncatingRemainder(dividingBy: 360), 0, accuracy: 0.5, "\(hero) \(trick.id)")
+            XCTAssertEqual(end.stretch, 1, accuracy: 0.01, "\(hero) \(trick.id)")
+            XCTAssertEqual(end.alpha, 1, accuracy: 0.01, "\(hero) \(trick.id)")
+            XCTAssertFalse(end.flipped, "\(hero) \(trick.id)")
+        }
+    }
+
+    func testEveryFrameIsFiniteAndStaysNearTheFigure() {
+        for (hero, _, trick) in everyTrick() {
+            XCTAssertTrue((1...3.5).contains(trick.duration), "\(trick.id) lasts \(trick.duration)s")
+            for step in 0...60 {
+                let frame = trick.frame(trick.duration * Double(step) / 60)
+                for value in [frame.dx, frame.dy, frame.rotation, frame.stretch, frame.alpha] {
+                    XCTAssertTrue(value.isFinite, "\(hero) \(trick.id)")
+                }
+                XCTAssertTrue((0...1).contains(frame.alpha), "\(hero) \(trick.id)")
+                for speck in frame.behind + frame.front {
+                    XCTAssertTrue(speck.x.isFinite && speck.y.isFinite, "\(hero) \(trick.id)")
+                    XCTAssertTrue((-20...50).contains(speck.x) && (-25...24).contains(speck.y),
+                                  "\(hero) \(trick.id) speck at \(speck.x), \(speck.y)")
+                }
+            }
+        }
+    }
+
+    func testPosesUsedByTricksExistForEveryEdition() {
+        let states: [TrickPose: PetState] = [.idle: .idle, .work: .working, .blocked: .blocked, .done: .done]
+        for (hero, edition, trick) in everyTrick() {
+            for step in 0...20 {
+                guard let state = states[trick.frame(trick.duration * Double(step) / 20).pose] else { continue }
+                for name in Pose.of(hero: hero, edition: edition, state: state).frames {
+                    XCTAssertNotNil(library.sprite(named: name), "\(trick.id) needs \(name)")
+                }
+            }
+        }
+    }
+
+    func testPickNeverRepeatsTheTrickJustPlayed() {
+        let ids = Tricks.all(for: .gimli, edition: .normal).map(\.id)
+        for previous in ids {
+            for roll in 0..<ids.count - 1 {
+                let picked = Tricks.pick(for: .gimli, edition: .normal, after: previous, random: { _ in roll })
+                XCTAssertNotEqual(picked.id, previous)
+            }
+        }
+    }
+
+    func testStageFindsTheTopOfTheHead() {
+        let sprite = Sprite(svg: ##"<rect x="3" y="5" width="2" height="1" fill="#000000"/><rect x="3" y="9" width="2" height="1" fill="#000000"/>"##)
+        XCTAssertEqual(Stage(sprite: sprite).headTop, 5)
+        XCTAssertEqual(Stage(sprite: nil).headTop, 2)
+    }
+}
