@@ -31,6 +31,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>LSMinimumSystemVersion</key><string>13.0</string>
   <key>LSUIElement</key><true/>
   <key>NSHighResolutionCapable</key><true/>
+  <key>NSAppleEventsUsageDescription</key><string>Po kliknięciu postaci Fellowship Desktop przełącza na kartę terminala, w której działa sesja Claude Code.</string>
 </dict>
 </plist>
 PLIST

@@ -5,6 +5,9 @@ struct SessionRecord: Codable, Equatable {
     var state: PetState
     var cwd: String?
     var updated: Date
+    var hostBundleID: String?
+    var entrypoint: String?
+    var tty: String?
 
     var project: String? {
         guard let cwd, !cwd.isEmpty else { return nil }
@@ -17,6 +20,8 @@ struct Summary: Equatable {
     /// Sessions in `state`, most recently updated first.
     let sessions: [SessionRecord]
     let total: Int
+    /// Every live session, most urgent first, then most recent.
+    var all: [SessionRecord] = []
 
     static let empty = Summary(state: .idle, sessions: [], total: 0)
 }
@@ -107,7 +112,8 @@ struct StatusStore {
     static func fold(_ records: [SessionRecord]) -> Summary {
         guard let top = records.map(\.state).max() else { return .empty }
         let matching = records.filter { $0.state == top }.sorted { $0.updated > $1.updated }
-        return Summary(state: top, sessions: matching, total: records.count)
+        let all = records.sorted { $0.state != $1.state ? $0.state > $1.state : $0.updated > $1.updated }
+        return Summary(state: top, sessions: matching, total: records.count, all: all)
     }
 
     /// The person has seen the pet celebrate: every finished session goes back to rest.

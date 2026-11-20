@@ -25,6 +25,30 @@ enum Bubble {
         return "Claude Code: \(sessions(summary.total)), \(state)"
     }
 
+    static func menuEntry(for record: SessionRecord) -> String {
+        let state = switch record.state {
+        case .blocked: "czeka na Ciebie"
+        case .working: "pracuje"
+        case .done: "skończył"
+        case .idle: "odpoczywa"
+        }
+        let host = record.hostBundleID.map { " · \(hostName($0))" } ?? ""
+        return "\(record.project ?? "?"): \(state)\(host)"
+    }
+
+    static func hostName(_ bundleID: String) -> String {
+        switch bundleID {
+        case "com.anthropic.claudefordesktop": "aplikacja Claude"
+        case "com.microsoft.VSCode", "com.microsoft.VSCodeInsiders": "VS Code"
+        case "com.todesktop.230313mzl4w4u92": "Cursor"
+        case "com.apple.Terminal": "Terminal"
+        case "com.googlecode.iterm2": "iTerm"
+        case "com.mitchellh.ghostty": "Ghostty"
+        case "dev.warp.Warp-Stable": "Warp"
+        default: bundleID.split(separator: ".").last.map(String.init) ?? bundleID
+        }
+    }
+
     /// Polish plural: 1 sesja, 2-4 sesje, 5+ sesji (12-14 sesji).
     static func sessions(_ n: Int) -> String {
         if n == 1 { return "1 sesja" }

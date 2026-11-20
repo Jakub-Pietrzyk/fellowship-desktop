@@ -12,6 +12,15 @@ Gandalf (albo ktoś inny z Drużyny) stoi na pulpicie Maca i pokazuje, co robi C
 | nic się nie dzieje | pyka fajkę |
 
 Przy kilku sesjach naraz postać pokazuje najpilniejszą: czeka > pracuje > skończył > odpoczywa.
+
+Kliknięcie postaci, gdy Claude czeka lub skończył, przenosi do tej sesji (do najnowszej, jeśli jest ich kilka).
+Menu na pasku pokazuje wszystkie sesje, a kliknięcie pozycji przenosi do jej okna:
+
+| Gdzie działa Claude Code | Dokąd przenosi |
+|---|---|
+| VS Code, Cursor, Windsurf | okno z folderem projektu |
+| Terminal, iTerm | karta z sesją; za pierwszym razem macOS pyta o zgodę na sterowanie terminalem (bez niej tylko przełącza na aplikację) |
+| aplikacja Claude i inne | przełącza na aplikację (bez wybierania konkretnej rozmowy) |
 Działa z Claude Code w terminalu, w Herdrze, w VS Code i w aplikacji desktopowej Claude, bo wszystkie czytają te
 same hooki z `~/.claude/settings.json`.
 

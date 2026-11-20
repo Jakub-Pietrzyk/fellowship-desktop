@@ -14,6 +14,11 @@ private enum Key {
 /// `edition` in the defaults: "random" draws a fresh edition at every launch, like a new agent in Herdr.
 private let randomEdition = "random"
 
+private final class SessionBox: NSObject {
+    let record: SessionRecord
+    init(_ record: SessionRecord) { self.record = record }
+}
+
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let defaults = UserDefaults.standard
@@ -118,10 +123,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         statusItem.button?.image = menuBarImage()
     }
 
+    /// Waiting or finished: the click takes the person to that session (the latest one, if several); finished
+    /// sessions then go back to rest.
     private func petClicked() {
-        guard summary.state == .done else { return }
-        store.acknowledgeDone()
-        refresh()
+        guard summary.state == .done || summary.state == .blocked else { return }
+        if let session = summary.sessions.first { Jump.plan(for: session).perform() }
+        if summary.state == .done {
+            store.acknowledgeDone()
+            refresh()
+        }
     }
 
     // MARK: - Menu bar
@@ -152,9 +162,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let status = NSMenuItem(title: Bubble.menuLine(for: summary), action: nil, keyEquivalent: "")
         status.isEnabled = false
         menu.addItem(status)
-        for session in summary.sessions.prefix(5) where summary.state != .idle {
-            let line = NSMenuItem(title: "   \(session.project ?? "?")", action: nil, keyEquivalent: "")
-            line.isEnabled = false
+        for session in summary.all.prefix(8) {
+            let line = NSMenuItem(title: "   \(Bubble.menuEntry(for: session))", action: #selector(jumpToSession(_:)), keyEquivalent: "")
+            line.target = self
+            line.representedObject = SessionBox(session)
+            if Jump.plan(for: session) == .none { line.action = nil }
             menu.addItem(line)
         }
         menu.addItem(.separator())
@@ -221,6 +233,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         item.target = self
         item.state = on ? .on : .off
         return item
+    }
+
+    @objc private func jumpToSession(_ sender: NSMenuItem) {
+        guard let session = (sender.representedObject as? SessionBox)?.record else { return }
+        Jump.plan(for: session).perform()
     }
 
     @objc private func pickHero(_ sender: NSMenuItem) {

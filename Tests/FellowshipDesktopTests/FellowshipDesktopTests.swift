@@ -158,3 +158,78 @@ final class BubbleTests: XCTestCase {
         XCTAssertNil(Bubble.text(for: Summary(state: .working, sessions: [], total: 1)))
     }
 }
+
+final class JumpTests: XCTestCase {
+    private func record(host: String?, cwd: String? = "/Users/kuba/Desktop/BodyVibes/bodyvibes_mobile", tty: String? = nil) -> SessionRecord {
+        SessionRecord(state: .done, cwd: cwd, updated: Date(), hostBundleID: host, tty: tty)
+    }
+
+    func testEditorsReopenTheProjectWindow() {
+        XCTAssertEqual(Jump.plan(for: record(host: "com.microsoft.VSCode")),
+                       .openFolder(bundleID: "com.microsoft.VSCode", path: "/Users/kuba/Desktop/BodyVibes/bodyvibes_mobile"))
+    }
+
+    func testEditorWithoutFolderIsOnlyBroughtForward() {
+        XCTAssertEqual(Jump.plan(for: record(host: "com.microsoft.VSCode", cwd: nil)), .activate(bundleID: "com.microsoft.VSCode"))
+    }
+
+    func testTerminalsGoToTheTab() {
+        XCTAssertEqual(Jump.plan(for: record(host: "com.apple.Terminal", tty: "/dev/ttys004")),
+                       .focusTerminalTab(bundleID: "com.apple.Terminal", tty: "/dev/ttys004"))
+        XCTAssertEqual(Jump.plan(for: record(host: "com.googlecode.iterm2")), .activate(bundleID: "com.googlecode.iterm2"))
+    }
+
+    func testOtherAppsAreBroughtForward() {
+        XCTAssertEqual(Jump.plan(for: record(host: "com.anthropic.claudefordesktop")), .activate(bundleID: "com.anthropic.claudefordesktop"))
+    }
+
+    func testUnknownHostDoesNothing() {
+        XCTAssertEqual(Jump.plan(for: record(host: nil)), .none)
+    }
+}
+
+final class SessionHostTests: XCTestCase {
+    func testHostComesFromTheEnvironment() {
+        let host = SessionHost.current(environment: ["__CFBundleIdentifier": "com.microsoft.VSCode", "CLAUDE_CODE_ENTRYPOINT": "claude-vscode"])
+        XCTAssertEqual(host.bundleID, "com.microsoft.VSCode")
+        XCTAssertEqual(host.entrypoint, "claude-vscode")
+    }
+
+    func testEmptyValuesAreIgnored() {
+        XCTAssertNil(SessionHost.current(environment: ["__CFBundleIdentifier": ""]).bundleID)
+    }
+
+    func testHookKeepsTheHostWhenALaterEventLacksIt() throws {
+        let store = StatusStore(directory: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
+        let vscode = SessionHost(bundleID: "com.microsoft.VSCode", entrypoint: "claude-vscode", tty: nil)
+        HookCommand.run(stdin: Data(#"{"session_id":"s","hook_event_name":"UserPromptSubmit","cwd":"/p"}"#.utf8), store: store, host: vscode)
+        HookCommand.run(stdin: Data(#"{"session_id":"s","hook_event_name":"Stop"}"#.utf8), store: store, host: SessionHost())
+        let record = try XCTUnwrap(store.read(sessionID: "s"))
+        XCTAssertEqual(record.hostBundleID, "com.microsoft.VSCode")
+        XCTAssertEqual(record.entrypoint, "claude-vscode")
+        XCTAssertEqual(record.state, .done)
+    }
+
+    func testOldRecordsWithoutHostStillDecode() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try Data(#"{"state":"done","cwd":"/p","updated":1000}"#.utf8).write(to: directory.appendingPathComponent("old.json"))
+        XCTAssertEqual(StatusStore(directory: directory).read(sessionID: "old")?.state, .done)
+    }
+
+    func testMenuEntryNamesProjectStateAndApp() {
+        let record = SessionRecord(state: .blocked, cwd: "/x/bodyvibes_supabase", updated: Date(), hostBundleID: "com.anthropic.claudefordesktop")
+        XCTAssertEqual(Bubble.menuEntry(for: record), "bodyvibes_supabase: czeka na Ciebie · aplikacja Claude")
+    }
+
+    func testAllSessionsAreSortedByUrgencyThenRecency() {
+        let now = Date()
+        let summary = StatusStore.fold([
+            SessionRecord(state: .idle, cwd: "/a", updated: now),
+            SessionRecord(state: .done, cwd: "/b", updated: now.addingTimeInterval(-60)),
+            SessionRecord(state: .done, cwd: "/c", updated: now),
+            SessionRecord(state: .blocked, cwd: "/d", updated: now.addingTimeInterval(-300)),
+        ])
+        XCTAssertEqual(summary.all.map(\.project), ["d", "c", "b", "a"])
+    }
+}
