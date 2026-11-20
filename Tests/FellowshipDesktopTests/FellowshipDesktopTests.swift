@@ -257,6 +257,14 @@ final class TrickTests: XCTestCase {
         }
     }
 
+    func testEveryTrickEndsOnAQuoteThatLingersLongEnoughToRead() {
+        for (hero, _, trick) in everyTrick() {
+            let quote = trick.frame(trick.duration).bubble
+            XCTAssertNotNil(quote, "\(hero) \(trick.id)")
+            XCTAssertGreaterThanOrEqual(PetView.linger(after: trick), Double(quote?.count ?? 0) * 0.05, "\(trick.id)")
+        }
+    }
+
     func testSaxGandalfPlaysTheSaxInsteadOfSmokingThePipe() {
         let ids = Tricks.all(for: .gandalf, edition: .sax).map(\.id)
         XCTAssertTrue(ids.contains("sax-solo"))

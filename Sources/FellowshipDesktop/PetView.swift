@@ -108,7 +108,7 @@ final class PetView: NSView {
         trickTimer?.invalidate()
         trickTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60, repeats: true) { [weak self] timer in
             guard let self, let start = self.trickStart, let trick = self.trick else { return timer.invalidate() }
-            if Date().timeIntervalSince(start) >= trick.duration {
+            if Date().timeIntervalSince(start) >= trick.duration + Self.linger(after: trick) {
                 self.trick = nil
                 self.trickStart = nil
                 timer.invalidate()
@@ -125,7 +125,15 @@ final class PetView: NSView {
     private var currentTrickFrame: TrickFrame? {
         guard let trick else { return nil }
         let t = frozenTrickTime ?? trickStart.map { Date().timeIntervalSince($0) } ?? 0
-        return t < trick.duration ? trick.frame(t) : nil
+        if t < trick.duration { return trick.frame(t) }
+        guard t < trick.duration + Self.linger(after: trick) else { return nil }
+        return TrickFrame(bubble: trick.frame(trick.duration).bubble)
+    }
+
+    /// The quote stays up after the animation for about as long as it takes to read it.
+    static func linger(after trick: Trick) -> TimeInterval {
+        guard let quote = trick.frame(trick.duration).bubble else { return 0 }
+        return max(1.5, Double(quote.count) * 0.06)
     }
 
     private func spriteName(for pose: TrickPose, at t: TimeInterval) -> String {
@@ -209,7 +217,7 @@ final class PetView: NSView {
         ]
         let string = NSAttributedString(string: text, attributes: attributes)
         let maxTextWidth = bounds.width - 24
-        var textSize = string.boundingRect(with: NSSize(width: maxTextWidth, height: 40), options: .usesLineFragmentOrigin).size
+        var textSize = string.boundingRect(with: NSSize(width: maxTextWidth, height: 60), options: .usesLineFragmentOrigin).size
         textSize.width = min(ceil(textSize.width), maxTextWidth)
         textSize.height = ceil(textSize.height)
         let box = NSRect(

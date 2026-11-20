@@ -11,17 +11,18 @@ Gandalf (albo ktoś inny z Drużyny) stoi na pulpicie Maca i pokazuje, co robi C
 | skończył | podskakuje, zielony dymek „gotowe!”; kliknij postać, żeby odpoczęła |
 | nic się nie dzieje | pyka fajkę |
 
-Kliknięcie postaci, gdy Claude pracuje albo odpoczywa, odpala sztuczkę (za każdym razem inną):
+Kliknięcie postaci, gdy Claude pracuje albo odpoczywa, odpala sztuczkę (za każdym razem inną). Każda kończy się
+cytatem z filmów; dymek zostaje tak długo, żeby dało się go przeczytać:
 
-| Postać | Sztuczki |
+| Postać | Sztuczka → cytat |
 |---|---|
-| Gandalf | fajerwerki, „Nie przejdziesz!”, kółka z dymu (Epic Sax Gandalf gra solo), „Czarodziej nigdy się nie spóźnia” |
-| Frodo | zakłada Pierścień i znika pod okiem Saurona, taniec Underhilla, świecące Żądło, liście Lórien |
-| Sam | żongluje ziemniakami, sadzi kwiatki, patelnia, „Ciebie mogę nieść!” |
-| Aragorn | „Za Frodo!”, Andúril, korona, athelas |
-| Legolas | strzały, zjazd na tarczy, elfi wzrok, salto |
-| Gimli | rzut krasnoludem, topór, kufel, tupanie |
-| Sauron | płonące Oko, Jedyny Pierścień, ciemność, gniew z piorunami |
+| Gandalf | fajerwerki → *Meriadoc Brandybuck and Peregrin Took. I might have known.*; pękająca ziemia → *You shall not pass!*; kółka z dymu → *All you have to decide is what to do with the time that is given to you.*; obrót z iskrami → *A wizard is never late, Frodo Baggins.*; Epic Sax Gandalf zamiast fajki gra solo → *Fly, you fools!* |
+| Frodo | znika z Pierścieniem pod okiem Saurona → *I wish the Ring had never come to me.*; taniec → *Underhill. My name's Underhill.*; świecące Żądło → *I will take it. I will take the Ring to Mordor.*; liście Lórien → *It's a dangerous business, Frodo, going out your door.* |
+| Sam | żonglerka ziemniakami → *Po-tay-toes! Boil 'em, mash 'em, stick 'em in a stew.*; kwiatki → *If I take one more step, it'll be the farthest away from home I've ever been.*; patelnia → *I think I'm getting the hang of this!*; → *I can't carry it for you, but I can carry you!* |
+| Aragorn | szarża → *For Frodo.*; cięcie mieczem → *You have my sword.*; korona → *My friends, you bow to no one.*; athelas → *If by my life or death I can protect you, I will.* |
+| Legolas | strzały → *Final count: forty-two.*; zjazd na tarczy → *You have my bow.*; elfi wzrok → *They're taking the hobbits to Isengard!*; salto → *A red sun rises. Blood has been spilled this night.* |
+| Gimli | rzut krasnoludem → *Nobody tosses a Dwarf!*; topór → *And my axe!*; kufel → *Certainty of death. Small chance of success. What are we waiting for?*; tupanie → *We dwarves are natural sprinters. Very dangerous over short distances.* |
+| Sauron | płonące Oko → *Ash nazg durbatulûk.*; krążący Pierścień → *One Ring to rule them all.*; ciemność → *My master, Sauron the Great, bids thee welcome.*; pioruny → *Against the power of Mordor there can be no victory.* |
 
 Konkretną sztuczkę wybierzesz z menu **Sztuczki** na pasku.
 

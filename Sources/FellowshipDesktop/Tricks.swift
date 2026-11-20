@@ -118,13 +118,13 @@ enum Tricks {
             f.front += burst(t, at: 0.8, x: 4, y: -5, count: 12, reach: 5, life: 0.9, colors: [Palette.red, Palette.orange, Palette.yellow])
             f.front += burst(t, at: 1.15, x: 11, y: -10, count: 16, reach: 7, life: 1.0, colors: [Palette.lightBlue, Palette.green, Palette.white])
             f.dy = hop(t, 0.45, 0.75, 1.5) + hop(t, 1.15, 1.45, 1.5)
-            if t > 1.6 { f.bubble = "Fajerwerki!" }
+            if t > 1.6 { f.bubble = "Meriadoc Brandybuck and Peregrin Took. I might have known." }
             return f
         }
     }
 
     static func youShallNotPass() -> Trick {
-        Trick(id: "shall-not-pass", title: "Nie przejdziesz!", duration: 2.2) { t in
+        Trick(id: "shall-not-pass", title: "You shall not pass!", duration: 2.2) { t in
             var f = TrickFrame(pose: .blocked)
             if t < 0.35 {
                 f.dy = -2 * phase(t, 0, 0.35)
@@ -140,7 +140,7 @@ enum Tricks {
                 }
                 f.front += burst(t, at: 0.35, x: 12, y: 18, count: 16, reach: 9, life: 0.7, colors: [Palette.white, Palette.lightBlue], gravity: 0)
                     .filter { $0.y <= 23.5 }
-                f.bubble = "Nie przejdziesz!"
+                f.bubble = "You shall not pass!"
             }
             return f
         }
@@ -158,7 +158,7 @@ enum Tricks {
                 f.front += hollowSquare(x: x, y: y, size: size, color: Palette.smoke, alpha: 1 - p)
             }
             f.stretch = 1 + 0.03 * sin(t * 6)
-            if t > 1.5 { f.bubble = "Pyk, pyk…" }
+            if t > 1.5 { f.bubble = "All you have to decide is what to do with the time that is given to you." }
             return f
         }
     }
@@ -174,19 +174,19 @@ enum Tricks {
                 let x = (i.isMultiple(of: 2) ? 20 : 2) + sin(p * 6) * 2
                 f.front += shape(Art.note, x: x, y: 10 - 14 * p, alpha: 1 - p * p)
             }
-            if t > 1.2 { f.bubble = "Epic sax!" }
+            if t > 1.2 { f.bubble = "Fly, you fools!" }
             return f
         }
     }
 
     static func neverLate(_ stage: Stage) -> Trick {
-        Trick(id: "never-late", title: "Czarodziej się nie spóźnia", duration: 2.6) { t in
+        Trick(id: "never-late", title: "A wizard is never late", duration: 2.6) { t in
             var f = TrickFrame(pose: .done)
             if t < 0.72 { f.flipped = Int(t / 0.12).isMultiple(of: 2) == false }
             f.dy = hop(t, 0.72, 1.12, 5)
             f.stretch = t > 1.12 && t < 1.3 ? 0.88 : 1
             f.front += sparkles(t, at: 1.12, around: stage, life: 0.8)
-            if t > 1.0 { f.bubble = "Czarodziej nigdy się nie spóźnia." }
+            if t > 1.0 { f.bubble = "A wizard is never late, Frodo Baggins." }
             return f
         }
     }
@@ -206,13 +206,13 @@ enum Tricks {
                 let pulse = 0.6 + 0.4 * sin(t * 10)
                 f.front += shape(Art.eye, x: 8.5, y: stage.headTop - 8, alpha: pulse * phase(t, 0.85, 1.1))
             }
-            if t > 2.3 { f.bubble = "Lepiej go zdejmę…" }
+            if t > 2.3 { f.bubble = "I wish the Ring had never come to me." }
             return f
         }
     }
 
     static func underhill() -> Trick {
-        Trick(id: "underhill", title: "Nazywam się Underhill", duration: 2.2) { t in
+        Trick(id: "underhill", title: "My name's Underhill", duration: 2.2) { t in
             var f = TrickFrame(pose: .work)
             let beat = 0.45
             f.dy = hop(t.truncatingRemainder(dividingBy: beat), 0, beat, 3) * (t < 1.8 ? 1 : 0)
@@ -222,7 +222,7 @@ enum Tricks {
                 guard p >= 0, p < 1 else { continue }
                 f.front += shape(Art.note, x: i == 1 ? 21 : 0, y: 8 - 12 * p, alpha: 1 - p)
             }
-            f.bubble = "Nazywam się Underhill!"
+            f.bubble = "Underhill. My name's Underhill."
             return f
         }
     }
@@ -238,7 +238,7 @@ enum Tricks {
                 f.behind.append(Speck(x: 12 + cos(angle) * radius, y: 11 + sin(angle) * radius * 0.75,
                                       color: i.isMultiple(of: 3) ? Palette.white : Palette.lightBlue, alpha: glow * phase(t, 0, 0.3)))
             }
-            f.bubble = "Żądło świeci… orkowie!"
+            f.bubble = "I will take it. I will take the Ring to Mordor."
             return f
         }
     }
@@ -254,7 +254,7 @@ enum Tricks {
                 f.front += shape(Art.leaf, x: x, y: -10 + 31 * p, alpha: 1 - phase(p, 0.8, 1))
             }
             f.stretch = 1 + 0.03 * sin(t * 4)
-            if t > 1.2 { f.bubble = "Liście Lórien…" }
+            if t > 1.2 { f.bubble = "It's a dangerous business, Frodo, going out your door." }
             return f
         }
     }
@@ -276,7 +276,7 @@ enum Tricks {
                 f.front += shape(Art.potato, x: x, y: y, alpha: 1)
             }
             f.dy = -abs(sin(t * .pi / 0.45)) * 0.8
-            if t > 2.2 { f.bubble = "Ziem-nia-ki!" }
+            if t > 2.2 { f.bubble = "Po-tay-toes! Boil 'em, mash 'em, stick 'em in a stew." }
             return f
         }
     }
@@ -296,7 +296,7 @@ enum Tricks {
                 if grow > 0.6 { f.behind += shape(flower.head, x: flower.x, y: 22 - height, alpha: phase(grow, 0.6, 1)) }
             }
             f.stretch = 1 - 0.05 * abs(sin(t * 6))
-            if t > 1.0 { f.bubble = "Trochę ziemi z Shire." }
+            if t > 1.0 { f.bubble = "If I take one more step, it'll be the farthest away from home I've ever been." }
             return f
         }
     }
@@ -312,13 +312,13 @@ enum Tricks {
             f.front += burst(t, at: 0.55, x: 22, y: 12, count: 8, reach: 5, life: 0.5, colors: [Palette.yellow, Palette.white], gravity: 0)
             if t > 0.55 && t < 0.9 { f.dx = wobble(t, 0.8) }
             f.rotation = 8 * swing * (1 - phase(t, 0.6, 1.0))
-            f.bubble = t < 0.55 ? nil : t < 1.2 ? "BONK!" : "Coraz lepiej mi idzie!"
+            f.bubble = t < 0.55 ? nil : "I think I'm getting the hang of this!"
             return f
         }
     }
 
     static func carryYou() -> Trick {
-        Trick(id: "carry-you", title: "Mogę Cię nieść", duration: 2.6) { t in
+        Trick(id: "carry-you", title: "I can carry you", duration: 2.6) { t in
             var f = TrickFrame(pose: .idle)
             f.stretch = 0.9 + 0.04 * sin(t * 8)
             f.dx = sin(t * .pi / 2.6 * 2) * 4
@@ -328,7 +328,7 @@ enum Tricks {
                 guard p >= 0, p < 1 else { continue }
                 f.front += shape(Art.drop, x: 4 + f.dx + start * 4, y: 4 + 6 * p, alpha: 1 - p)
             }
-            f.bubble = "Ciebie mogę nieść!"
+            f.bubble = "I can't carry it for you, but I can carry you!"
             return f
         }
     }
@@ -336,7 +336,7 @@ enum Tricks {
     // MARK: Aragorn
 
     static func forFrodo() -> Trick {
-        Trick(id: "for-frodo", title: "Za Frodo!", duration: 2.0) { t in
+        Trick(id: "for-frodo", title: "For Frodo", duration: 2.0) { t in
             var f = TrickFrame(pose: .work)
             let out = easeInOut(phase(t, 0.1, 0.8))
             let back = easeInOut(phase(t, 1.0, 1.7))
@@ -349,7 +349,7 @@ enum Tricks {
                 let behindX = f.flipped ? f.dx + 18 + p * 4 : f.dx + 6 - p * 4
                 f.behind.append(Speck(x: behindX, y: 23 - p * 2, color: Palette.dust, alpha: 1 - p))
             }
-            f.bubble = "Za Frodo!"
+            f.bubble = "For Frodo."
             return f
         }
     }
@@ -368,7 +368,7 @@ enum Tricks {
             }
             f.front += burst(t, at: 0.55, x: 24, y: 10, count: 10, reach: 4, life: 0.6, colors: [Palette.white, Palette.yellow], gravity: 0)
             f.dy = hop(t, 0.5, 0.8, 1.5)
-            if t > 0.6 { f.bubble = "Andúril, Płomień Zachodu!" }
+            if t > 0.6 { f.bubble = "You have my sword." }
             return f
         }
     }
@@ -382,7 +382,7 @@ enum Tricks {
             f.front = shape(Art.crown, x: 9.5, y: rest - 10 * (1 - drop), alpha: fade)
             f.front += sparkles(t, at: 1.0, around: stage, life: 0.9)
             f.stretch = t > 1.0 && t < 1.15 ? 0.95 : 1
-            if t > 1.1 { f.bubble = "Król powraca." }
+            if t > 1.1 { f.bubble = "My friends, you bow to no one." }
             return f
         }
     }
@@ -402,7 +402,7 @@ enum Tricks {
                 f.behind.append(Speck(x: 12 + cos(angle) * 13, y: 13 + sin(angle) * 11,
                                       color: i.isMultiple(of: 2) ? Palette.green : Palette.foam, alpha: glow * (0.5 + 0.5 * sin(t * 6 + Double(i)))))
             }
-            if t > 0.8 { f.bubble = "Athelas, ziele królów." }
+            if t > 0.8 { f.bubble = "If by my life or death I can protect you, I will." }
             return f
         }
     }
@@ -418,7 +418,7 @@ enum Tricks {
                 f.front += shape(Art.arrow, x: 16 + p * 26, y: 11 - p * 3, alpha: 1)
                 if p < 0.3 { f.dx = -0.7 }
             }
-            if t > 1.3 { f.bubble = "Mam już czterdzieści dwa!" }
+            if t > 1.3 { f.bubble = "Final count: forty-two." }
             return f
         }
     }
@@ -439,7 +439,7 @@ enum Tricks {
                     f.behind.append(Speck(x: f.dx + 6 - k * 2, y: 23 - k * 0.6, color: Palette.dust, alpha: 0.8 - k * 0.15))
                 }
             }
-            f.bubble = "Juhuu!"
+            f.bubble = "You have my bow."
             return f
         }
     }
@@ -451,7 +451,7 @@ enum Tricks {
             f.stretch = t > 0.2 && t < 1.8 ? 1.04 : 1
             let twinkle = t > 1.3 && t < 1.8
             if twinkle { f.front = shape(Art.sparkle, x: 13, y: stage.headTop + 5, alpha: 1 - phase(t, 1.3, 1.8)) }
-            if t > 0.6 { f.bubble = "Widzę jeźdźców Rohanu!" }
+            if t > 0.6 { f.bubble = "They're taking the hobbits to Isengard!" }
             return f
         }
     }
@@ -465,7 +465,7 @@ enum Tricks {
             f.stretch = t < 0.2 ? 1 - 0.12 * phase(t, 0, 0.2) : t > 0.9 && t < 1.05 ? 0.9 : 1
             f.front = burst(t, at: 0.9, x: 12, y: 23, count: 6, reach: 4, life: 0.4, colors: [Palette.dust], gravity: 0)
                 .filter { $0.y <= 23.5 }
-            if t > 1.0 { f.bubble = "Elfie salto!" }
+            if t > 1.0 { f.bubble = "A red sun rises. Blood has been spilled this night." }
             return f
         }
     }
@@ -483,7 +483,7 @@ enum Tricks {
             }
             f.front = burst(t, at: 1.05, x: 12, y: 23, count: 8, reach: 6, life: 0.5, colors: [Palette.dust], gravity: 0)
                 .filter { $0.y <= 23.5 }
-            if t > 1.1 { f.bubble = "Nikt nie rzuca krasnoludem!" }
+            if t > 1.1 { f.bubble = "Nobody tosses a Dwarf!" }
             return f
         }
     }
@@ -502,7 +502,7 @@ enum Tricks {
                                  colors: [Palette.wood, Palette.leafDark, Palette.dust])
                     .filter { $0.y <= 23.5 }
             }
-            f.bubble = t < 0.4 ? nil : t < 1.3 ? "Ha!" : "I jeszcze raz!"
+            f.bubble = t < 0.4 ? nil : "And my axe!"
             return f
         }
     }
@@ -521,7 +521,7 @@ enum Tricks {
                 }
             }
             f.dy = hop(t, 2.0, 2.25, 2)
-            if t > 1.6 { f.bubble = "Krasnoluda nie przepijesz!" }
+            if t > 1.6 { f.bubble = "Certainty of death. Small chance of success. What are we waiting for?" }
             return f
         }
     }
@@ -539,7 +539,7 @@ enum Tricks {
                 f.front += burst(t, at: landing, x: 12, y: 23, count: 6, reach: 5, life: 0.35, colors: [Palette.dust], gravity: 0)
                     .filter { $0.y <= 23.5 }
             }
-            if t > 0.4 { f.bubble = "Groźni na krótkich dystansach!" }
+            if t > 0.4 { f.bubble = "We dwarves are natural sprinters. Very dangerous over short distances." }
             return f
         }
     }
@@ -560,7 +560,7 @@ enum Tricks {
                 f.behind.append(Speck(x: x, y: 23 - p * 18, w: size, h: size, color: colors[Int(p * 3) % 3], alpha: strength * (1 - p)))
             }
             f.stretch = 1 + 0.03 * sin(t * 12)
-            if t > 0.4 { f.bubble = "Widzę Cię." }
+            if t > 0.4 { f.bubble = "Ash nazg durbatulûk." }
             return f
         }
     }
@@ -572,7 +572,7 @@ enum Tricks {
             let angle = t * 2 * .pi / 1.2
             let ring = shape(Art.ring, x: 10 + cos(angle) * 14, y: 10 + sin(angle) * 4, alpha: presence)
             if sin(angle) > 0 { f.front = ring } else { f.behind = ring }
-            if t > 0.5 { f.bubble = "Jeden, by wszystkimi rządzić." }
+            if t > 0.5 { f.bubble = "One Ring to rule them all." }
             return f
         }
     }
@@ -592,7 +592,7 @@ enum Tricks {
                 f.front = burst(t, at: 0.9, x: 12, y: 6, count: 10, reach: 8, life: 0.8, colors: [Palette.red, Palette.orange], gravity: 0)
                 f.stretch = 1 + 0.05 * sin(t * 10)
             }
-            if t > 0.6 { f.bubble = "Ciemność nadchodzi…" }
+            if t > 0.6 { f.bubble = "My master, Sauron the Great, bids thee welcome." }
             return f
         }
     }
@@ -607,7 +607,7 @@ enum Tricks {
                 guard p >= 0, p < 1 else { continue }
                 f.behind += bolt(x: x, alpha: 1 - p)
             }
-            if t > 0.3 { f.bubble = "Gdzie jest Pierścień?!" }
+            if t > 0.3 { f.bubble = "Against the power of Mordor there can be no victory." }
             return f
         }
     }
